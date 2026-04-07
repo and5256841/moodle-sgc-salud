@@ -4,6 +4,22 @@ set -e
 # Default port for Render
 export PORT="${PORT:-10000}"
 
+# Create and set permissions for all required directories
+mkdir -p /var/www/moodledata
+mkdir -p /var/www/moodledata/cache
+mkdir -p /var/www/moodledata/localcache
+mkdir -p /var/www/moodledata/temp
+mkdir -p /var/www/moodledata/sessions
+mkdir -p /var/www/moodledata/lock
+mkdir -p /var/www/moodledata/filedir
+mkdir -p /var/www/moodledata/trashdir
+mkdir -p /var/www/moodledata/lang
+mkdir -p /tmp/moodlelocalcache
+chown -R www-data:www-data /var/www/moodledata
+chown -R www-data:www-data /tmp/moodlelocalcache
+chmod -R 777 /var/www/moodledata
+chmod -R 777 /tmp/moodlelocalcache
+
 # Generate config.php from environment variables
 if [ -n "$DATABASE_URL" ]; then
     # Parse DATABASE_URL (format: postgres://user:password@host:port/dbname)
@@ -38,12 +54,14 @@ global \$CFG;
 \$CFG->wwwroot   = '${MOODLE_URL:-http://localhost}';
 \$CFG->dataroot  = '/var/www/moodledata';
 \$CFG->admin     = 'admin';
-\$CFG->directorypermissions = 0775;
+\$CFG->directorypermissions = 0777;
+\$CFG->filepermissions = 0666;
 
-// Performance settings
 \$CFG->cachedir = '/var/www/moodledata/cache';
 \$CFG->localcachedir = '/tmp/moodlelocalcache';
-@mkdir(\$CFG->localcachedir, 0775, true);
+\$CFG->tempdir = '/var/www/moodledata/temp';
+\$CFG->lockdir = '/var/www/moodledata/lock';
+\$CFG->sessiondir = '/var/www/moodledata/sessions';
 
 require_once(__DIR__ . '/lib/setup.php');
 CFGEOF
@@ -51,10 +69,7 @@ CFGEOF
     chown www-data:www-data /var/www/html/config.php
 fi
 
-# Ensure moodledata permissions
-chown -R www-data:www-data /var/www/moodledata
-
-# Run Moodle install/upgrade if needed
+# Run Moodle install if needed
 if [ -n "$DATABASE_URL" ] && [ -n "$MOODLE_INSTALL" ]; then
     php /var/www/html/admin/cli/install_database.php \
         --agree-license \
