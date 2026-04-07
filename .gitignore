@@ -1,0 +1,5 @@
+moodle_backup.sql
+moodle-src/.git/
+*.log
+.DS_Store
+Thumbs.db

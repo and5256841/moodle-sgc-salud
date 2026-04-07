@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: moodle-sgc
+    runtime: docker
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: moodle-db
+          property: connectionString
+      - key: MOODLE_URL
+        sync: false
+      - key: MOODLE_INSTALL
+        value: "true"
+      - key: MOODLE_ADMIN_USER
+        value: "admin"
+      - key: MOODLE_ADMIN_PASS
+        generateValue: true
+      - key: MOODLE_ADMIN_EMAIL
+        value: "admin@example.com"
+      - key: PORT
+        value: "10000"
+
+databases:
+  - name: moodle-db
+    plan: free
+    databaseName: moodle
+    postgresMajorVersion: "15"
