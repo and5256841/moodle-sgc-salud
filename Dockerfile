@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     cron \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure and install PHP extensions
+# Configure and install PHP extensions (dom first, then xmlreader which depends on it)
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
     gd \
@@ -28,8 +28,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     sodium \
     exif \
     opcache \
-    mbstring \
-    xml \
+    dom \
     xmlreader
 
 # Enable Apache modules
