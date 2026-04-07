@@ -15,7 +15,8 @@ RUN apt-get update && apt-get install -y \
     cron \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure and install PHP extensions (dom first, then xmlreader which depends on it)
+# Configure and install PHP extensions
+# Note: xml, xmlreader, mbstring, dom already included in php:8.2-apache
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
     gd \
@@ -27,9 +28,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     soap \
     sodium \
     exif \
-    opcache \
-    dom \
-    xmlreader
+    opcache
 
 # Enable Apache modules
 RUN a2enmod rewrite headers
